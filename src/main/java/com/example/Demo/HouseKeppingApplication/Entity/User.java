@@ -30,7 +30,6 @@ public class User {
 	
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
-
 	
 	public enum UserRole {
 	    HOUSEKEEPER,
