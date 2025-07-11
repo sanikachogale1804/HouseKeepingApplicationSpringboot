@@ -1,0 +1,55 @@
+package com.example.Demo.HouseKeppingApplication.Controller;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.Demo.HouseKeppingApplication.Entity.FloorData;
+import com.example.Demo.HouseKeppingApplication.Repository.floorDataRepository;
+import com.example.Demo.HouseKeppingApplication.Service.FileService;
+
+import jakarta.servlet.http.HttpServletResponse;
+
+@RestController
+public class TaskController {
+	
+	@Value("${tasks.image.path}")
+	private String imagePath;
+	
+	@Autowired
+	private floorDataRepository floorDataRepository;
+	
+	@Autowired
+	private FileService fileService;
+	
+	@PostMapping("floorData/{floorDataId}/image")
+	   public ResponseEntity<String> uploadTaskImage(@RequestParam("taskImage") MultipartFile image, @PathVariable Long floorDataId) throws IOException, java.io.IOException {
+	       String imageName = fileService.uploadFile(image, imagePath);
+	        FloorData floorData = floorDataRepository.findById(floorDataId).get();
+	        System.out.println("ImageName"+imageName);
+	        floorData.setTaskImage(imageName);
+	        floorDataRepository.save(floorData);
+	       return new ResponseEntity<String>("Successs",HttpStatus.ACCEPTED);
+	   }
+	
+	@GetMapping(value = "floorData/{floorDataId}/image")
+	   public void serveTaskImage(@PathVariable Long floorDataId, HttpServletResponse response) throws  java.io.IOException {
+		   FloorData floorData = floorDataRepository.findById(floorDataId).get();
+	       InputStream resource = fileService.getResource(imagePath, floorData.getTaskImage());
+	       response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+	       StreamUtils.copy(resource, response.getOutputStream());
+	   }
+
+}
