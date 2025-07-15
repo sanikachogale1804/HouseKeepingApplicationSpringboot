@@ -35,21 +35,40 @@ public class TaskController {
 	private FileService fileService;
 	
 	@PostMapping("floorData/{floorDataId}/image")
-	   public ResponseEntity<String> uploadTaskImage(@RequestParam("taskImage") MultipartFile image, @PathVariable Long floorDataId) throws IOException, java.io.IOException {
-	       String imageName = fileService.uploadFile(image, imagePath);
-	        FloorData floorData = floorDataRepository.findById(floorDataId).get();
-	        System.out.println("ImageName"+imageName);
-	        floorData.setTaskImage(imageName);
-	        floorDataRepository.save(floorData);
-	       return new ResponseEntity<String>("Successs",HttpStatus.ACCEPTED);
-	   }
+	public ResponseEntity<String> uploadTaskImage(
+	        @RequestParam("taskImage") MultipartFile image,
+	        @PathVariable Long floorDataId) throws IOException {
+
+	    return floorDataRepository.findById(floorDataId).map(floorData -> {
+	        try {
+	            String imageName = fileService.uploadFile(image, imagePath);
+	            System.out.println("✅ ImageName: " + imageName);
+
+	            floorData.setTaskImage(imageName);
+	            floorDataRepository.save(floorData);
+	            return new ResponseEntity<>("✅ Image uploaded successfully", HttpStatus.ACCEPTED);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	            return new ResponseEntity<>("❌ Image upload failed", HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+	    }).orElseGet(() -> {
+	        return new ResponseEntity<>("❌ FloorData with ID " + floorDataId + " not found", HttpStatus.NOT_FOUND);
+	    });
+	}
+
 	
 	@GetMapping(value = "floorData/{floorDataId}/image")
-	   public void serveTaskImage(@PathVariable Long floorDataId, HttpServletResponse response) throws  java.io.IOException {
-		   FloorData floorData = floorDataRepository.findById(floorDataId).get();
-	       InputStream resource = fileService.getResource(imagePath, floorData.getTaskImage());
-	       response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-	       StreamUtils.copy(resource, response.getOutputStream());
-	   }
+	public void serveTaskImage(@PathVariable Long floorDataId, HttpServletResponse response) throws IOException {
+	    floorDataRepository.findById(floorDataId).ifPresent(floorData -> {
+	        try (InputStream resource = fileService.getResource(imagePath, floorData.getTaskImage())) {
+	            response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+	            StreamUtils.copy(resource, response.getOutputStream());
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+	        }
+	    });
+	}
+
 
 }
