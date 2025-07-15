@@ -18,30 +18,34 @@ public class FileServiceImpl implements FileService{
 
 	@Override
 	public String uploadFile(MultipartFile file, String path) throws IOException {
-		//abc.png
-	       String originalFilename = file.getOriginalFilename();
-	     
-	       String filename = UUID.randomUUID().toString();
-	       String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-	       String fileNameWithExtension = filename + extension;
-	       String fullPathWithFileName = Paths.get(path, fileNameWithExtension).toString();
+	    String originalFilename = file.getOriginalFilename(); // e.g., "Ground_Floor-Washroom-BEFORE.jpg"
 
-	     
-	       if (extension.equalsIgnoreCase(".png") || extension.equalsIgnoreCase(".jpg") || extension.equalsIgnoreCase(".jpeg")) {
-	           //file save
-	      
-	           File folder = new File(path);
-	           if (!folder.exists()) {
-	               //create the folder
-	               folder.mkdirs();
-	           }
-	           //upload
-	           Files.copy(file.getInputStream(), Paths.get(fullPathWithFileName));
-	           return fileNameWithExtension;
-	       } else {
-	           throw new RuntimeException("File with this " + extension + " not allowed !!");
-	       }
+	    // ✅ Validate extension
+	    String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+	    if (!extension.equalsIgnoreCase(".png") &&
+	        !extension.equalsIgnoreCase(".jpg") &&
+	        !extension.equalsIgnoreCase(".jpeg")) {
+	        throw new RuntimeException("File with extension " + extension + " not allowed!");
+	    }
+
+	    // ✅ Optional: sanitize filename (replace spaces, remove special chars)
+	    String sanitizedFilename = originalFilename.replaceAll("\\s+", "_").replaceAll("[^a-zA-Z0-9._-]", "");
+
+	    // ✅ Build full path
+	    String fullPathWithFileName = Paths.get(path, sanitizedFilename).toString();
+
+	    // ✅ Create folder if it doesn't exist
+	    File folder = new File(path);
+	    if (!folder.exists()) {
+	        folder.mkdirs();
+	    }
+
+	    // ✅ Save file (overwrite if exists)
+	    Files.copy(file.getInputStream(), Paths.get(fullPathWithFileName), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+	    return sanitizedFilename; // return exact name used for saving
 	}
+
 
 	@Override
 	public InputStream getResource(String path, String name) throws FileNotFoundException {
