@@ -1,5 +1,7 @@
 package com.example.Demo.HouseKeppingApplication.Service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +20,20 @@ public class UserService {
 	
 	@Autowired
 	private JWTService jwtService;
+	
+	@Autowired
+	private userRepository userRepository;
+
+	
+	public List<User> getAllUsers() {
+	    return userRepository.findAll();
+	}
+
+	public User getUserById(Long id) {
+	    return userRepository.findById(id)
+	        .orElseThrow(() -> new RuntimeException("User not found"));
+	}
+
 	
 	@Autowired
 	AuthenticationManager authManager;

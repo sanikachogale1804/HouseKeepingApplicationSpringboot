@@ -1,36 +1,58 @@
 package com.example.Demo.HouseKeppingApplication.Controller;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.Demo.HouseKeppingApplication.Entity.User;
+import com.example.Demo.HouseKeppingApplication.Repository.userRepository;
 import com.example.Demo.HouseKeppingApplication.Service.UserService;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
-	
+
     @Autowired
     private UserService service;
-	
+
+    @Autowired
+    private userRepository userRepository; // ✅ Add this
+
+    @GetMapping("/users")
+    public CollectionModel<EntityModel<User>> getAllUsers() {
+        List<User> users = service.getAllUsers();
+
+        List<EntityModel<User>> userModels = users.stream()
+            .map(user -> EntityModel.of(user,
+                linkTo(methodOn(UserController.class).getUserById(user.getId())).withSelfRel()
+            ))
+            .collect(Collectors.toList());
+
+        return CollectionModel.of(userModels,
+            linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel());
+    }
+
+    @GetMapping("/users/{id}")
+    public EntityModel<User> getUserById(@PathVariable Long id) {
+        User user = service.getUserById(id);
+        return EntityModel.of(user,
+            linkTo(methodOn(UserController.class).getUserById(id)).withSelfRel(),
+            linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
+    }
+
     @PostMapping("/register")
     public User register(@RequestBody User user) {
         return service.register(user);
     }
-    
-//    @GetMapping("/login")
-//    public String login(@RequestBody User user) {
-//        System.out.println(user);
-//        return service.verify(user);
-//    }
-	
+
     @GetMapping("/login")
     public String login(@RequestParam String username, @RequestParam String userPassword) {
         User user = new User();
@@ -39,6 +61,29 @@ public class UserController {
         System.out.println(user);
         return service.verify(user);
     }
-	
 
+    // ✅ PUT for updating username and role (password skipped)
+    @PutMapping("/users/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        Optional<User> optionalUser = userRepository.findById(id);
+
+        if (optionalUser.isPresent()) {
+            User existingUser = optionalUser.get();
+            existingUser.setUsername(updatedUser.getUsername());
+            existingUser.setRole(updatedUser.getRole());
+
+            // ✅ Optional: skip password update for now
+            // You can uncomment this later when you add encoder
+            /*
+            if (updatedUser.getUserPassword() != null && !updatedUser.getUserPassword().isEmpty()) {
+                existingUser.setUserPassword(passwordEncoder.encode(updatedUser.getUserPassword()));
+            }
+            */
+
+            userRepository.save(existingUser);
+            return ResponseEntity.ok(existingUser);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

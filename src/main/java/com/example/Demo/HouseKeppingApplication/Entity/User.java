@@ -33,7 +33,9 @@ public class User {
 	
 	public enum UserRole {
 	    HOUSEKEEPER,
-	    SUPERVISOR
+	    SUPERVISOR,
+	    ADMIN,
+	    USER
 	}
 
 
