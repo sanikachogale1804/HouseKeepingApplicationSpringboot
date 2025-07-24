@@ -55,7 +55,22 @@ public class UserService {
 			
 		return "Fail";
 			
-		
 	}
+	
+	public User updateUser(Long id, User updatedUser) {
+	    User existingUser = userRepository.findById(id)
+	        .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    existingUser.setUsername(updatedUser.getUsername());
+	    existingUser.setRole(updatedUser.getRole());
+
+	    if (updatedUser.getUserPassword() != null && !updatedUser.getUserPassword().isEmpty()) {
+	        existingUser.setUserPassword(encoder.encode(updatedUser.getUserPassword())); // ✅ Encode here
+	    }
+
+	    return userRepository.save(existingUser);
+	}
+
+
 
 }

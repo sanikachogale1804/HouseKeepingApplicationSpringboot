@@ -39,6 +39,7 @@ public class SecurityConfig {
 		     .authorizeHttpRequests(request -> request
 		    		 .requestMatchers("register","login").permitAll()	    		 
 		    		 .requestMatchers("/floorData", "/users").permitAll()
+		    		 .requestMatchers("/users/**").permitAll()
 		    		 .anyRequest().authenticated())
 		     .httpBasic(Customizer.withDefaults())
 		     .sessionManagement(session-> 

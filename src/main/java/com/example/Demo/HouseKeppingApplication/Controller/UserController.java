@@ -62,28 +62,35 @@ public class UserController {
         return service.verify(user);
     }
 
-    // ✅ PUT for updating username and role (password skipped)
+//    // ✅ PUT for updating username and role (password skipped)
+//    @PutMapping("/users/{id}")
+//    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+//        Optional<User> optionalUser = userRepository.findById(id);
+//
+//        if (optionalUser.isPresent()) {
+//            User existingUser = optionalUser.get();
+//            existingUser.setUsername(updatedUser.getUsername());
+//            existingUser.setRole(updatedUser.getRole());
+//
+//            // ✅ Optional: skip password update for now
+//            // You can uncomment this later when you add encoder
+//            /*
+//            if (updatedUser.getUserPassword() != null && !updatedUser.getUserPassword().isEmpty()) {
+//                existingUser.setUserPassword(passwordEncoder.encode(updatedUser.getUserPassword()));
+//            }
+//            */
+//
+//            userRepository.save(existingUser);
+//            return ResponseEntity.ok(existingUser);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+    
     @PutMapping("/users/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        Optional<User> optionalUser = userRepository.findById(id);
-
-        if (optionalUser.isPresent()) {
-            User existingUser = optionalUser.get();
-            existingUser.setUsername(updatedUser.getUsername());
-            existingUser.setRole(updatedUser.getRole());
-
-            // ✅ Optional: skip password update for now
-            // You can uncomment this later when you add encoder
-            /*
-            if (updatedUser.getUserPassword() != null && !updatedUser.getUserPassword().isEmpty()) {
-                existingUser.setUserPassword(passwordEncoder.encode(updatedUser.getUserPassword()));
-            }
-            */
-
-            userRepository.save(existingUser);
-            return ResponseEntity.ok(existingUser);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        User updated = service.updateUser(id, updatedUser); // ✅ Delegate to service
+        return ResponseEntity.ok(updated);
     }
+
 }
