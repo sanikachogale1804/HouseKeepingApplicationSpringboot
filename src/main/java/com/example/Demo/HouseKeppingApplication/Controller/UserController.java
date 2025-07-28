@@ -27,7 +27,7 @@ public class UserController {
     private UserService service;
 
     @Autowired
-    private userRepository userRepository; // ✅ Add this
+    private userRepository userRepository; 
 
     @GetMapping("/users")
     public CollectionModel<EntityModel<User>> getAllUsers() {
@@ -121,7 +121,7 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         userRepository.deleteById(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build(); 
     }
 
 }

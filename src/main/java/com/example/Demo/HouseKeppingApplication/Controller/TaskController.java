@@ -2,6 +2,7 @@ package com.example.Demo.HouseKeppingApplication.Controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,7 +58,7 @@ public class TaskController {
 	    });
 	}
 
-	
+	@CrossOrigin(origins = "http://localhost:3000")
 	@GetMapping(value = "floorData/{floorDataId}/image")
 	public void serveTaskImage(@PathVariable Long floorDataId, HttpServletResponse response) throws IOException {
 	    floorDataRepository.findById(floorDataId).ifPresent(floorData -> {
@@ -69,6 +71,39 @@ public class TaskController {
 	        }
 	    });
 	}
+	
 
 
+	@CrossOrigin(origins = "http://localhost:3000")
+	@GetMapping("/floorData/images")
+	public ResponseEntity<List<FloorData>> getImagesBySubFloorName(
+	        @RequestParam(required = false) String floorName,
+	        @RequestParam String subFloorName,
+	        @RequestParam(required = false) String imageType) {
+
+	    List<FloorData> results;
+
+	    if (floorName != null && imageType != null) {
+	        results = floorDataRepository.findByFloorNameAndSubFloorNameAndImageType(floorName, subFloorName, imageType);
+	    } else if (floorName != null) {
+	        results = floorDataRepository.findByFloorNameAndSubFloorName(floorName, subFloorName);
+	    } else if (imageType != null) {
+	        results = floorDataRepository.findBySubFloorNameAndImageType(subFloorName, imageType);
+	    } else {
+	        results = floorDataRepository.findBySubFloorName(subFloorName);
+	    }
+
+	    return new ResponseEntity<>(results, HttpStatus.OK);
+	}
+
+
+private void serveImage(HttpServletResponse response, String imageName) {
+    try (InputStream resource = fileService.getResource(imagePath, imageName)) {
+        response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+        StreamUtils.copy(resource, response.getOutputStream());
+    } catch (IOException e) {
+        e.printStackTrace();
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+    }
+}
 }

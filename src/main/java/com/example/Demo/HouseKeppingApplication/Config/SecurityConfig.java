@@ -40,6 +40,7 @@ public class SecurityConfig {
 		    		 .requestMatchers("register","login").permitAll()	    		 
 		    		 .requestMatchers("/floorData", "/users").permitAll()
 		    		 .requestMatchers("/users/**").permitAll()
+		    		 .requestMatchers("/floorData", "/floorData/**", "/floorData/image").permitAll()
 		    		 .anyRequest().authenticated())
 		     .httpBasic(Customizer.withDefaults())
 		     .sessionManagement(session-> 
