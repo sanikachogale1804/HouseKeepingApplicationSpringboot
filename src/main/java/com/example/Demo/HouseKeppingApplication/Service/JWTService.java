@@ -14,6 +14,8 @@ import javax.crypto.SecretKey;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.example.Demo.HouseKeppingApplication.Entity.User;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -35,20 +37,22 @@ public class JWTService {
 	        }
 	    }
 
-	public String generateToken(String username) {
-		
-		 Map<String, Object> claims = new HashMap<>();
-		 
-		 return Jwts.builder()
-				 .claims()
-				 .add(claims)
-				 .subject(username)
-				 .issuedAt(new Date(System.currentTimeMillis()))
-				 .expiration(new Date(System.currentTimeMillis() * 60 * 60 * 30))
-				 .and()
-				 .signWith(getKey())
-				 .compact();
-	}
+	 public String generateToken(User user) {
+		    Map<String, Object> claims = new HashMap<>();
+		    claims.put("role", user.getRole()); // 👈 Add role claim
+
+		    return Jwts.builder()
+		            .claims()
+		            .add(claims)
+		            .subject(user.getUsername())
+		            .issuedAt(new Date(System.currentTimeMillis()))
+		            .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 hours
+		            .and()
+		            .signWith(getKey())
+		            .compact();
+		}
+
+
 
 	// Generate the SecretKey from the encoded secret key
     private SecretKey getKey() {

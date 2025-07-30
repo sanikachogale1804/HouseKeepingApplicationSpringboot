@@ -47,16 +47,18 @@ public class UserService {
 	}
 
 	public String verify(User user) {
-		Authentication authentication=
-				authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getUserPassword()));
-		
-		if(authentication.isAuthenticated()) 
-			return jwtService.generateToken(user.getUsername());
-			
-		return "Fail";
-			
+	    Authentication authentication =
+	        authManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getUserPassword()));
+
+	    if (authentication.isAuthenticated()) {
+	        // 👇 DB se original user object fetch karo (taaki uska role mile)
+	        User existingUser = userRepository.findByUsername(user.getUsername());
+	        return jwtService.generateToken(existingUser);
+	    }
+
+	    return "Fail";
 	}
-	
+
 	public User updateUser(Long id, User updatedUser) {
 	    User existingUser = userRepository.findById(id)
 	        .orElseThrow(() -> new RuntimeException("User not found"));
