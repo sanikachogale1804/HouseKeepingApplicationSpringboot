@@ -29,6 +29,13 @@ public class UserController {
     @Autowired
     private userRepository userRepository; 
 
+    @CrossOrigin(origins = {
+    	    "http://localhost:8080",
+    	    "http://127.0.0.1:8080",
+    	    "http://192.168.1.92:8080",
+    	    "http://45.115.186.228:8080",
+    	    "http://localhost:3000"
+    	})
     @GetMapping("/users")
     public CollectionModel<EntityModel<User>> getAllUsers() {
         List<User> users = service.getAllUsers();
@@ -43,6 +50,13 @@ public class UserController {
             linkTo(methodOn(UserController.class).getAllUsers()).withSelfRel());
     }
 
+    @CrossOrigin(origins = {
+    	    "http://localhost:8080",
+    	    "http://127.0.0.1:8080",
+    	    "http://192.168.1.92:8080",
+    	    "http://45.115.186.228:8080",
+    	    "http://localhost:3000"
+    	})
     @GetMapping("/users/{id}")
     public EntityModel<User> getUserById(@PathVariable Long id) {
         User user = service.getUserById(id);
@@ -102,12 +116,26 @@ public class UserController {
 //        }
 //    }
     
+    @CrossOrigin(origins = {
+    	    "http://localhost:8080",
+    	    "http://127.0.0.1:8080",
+    	    "http://192.168.1.92:8080",
+    	    "http://45.115.186.228:8080",
+    	    "http://localhost:3000"
+    	})
     @PutMapping("/users/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         User updated = service.updateUser(id, updatedUser); // ✅ Delegate to service
         return ResponseEntity.ok(updated);
     }
     
+    @CrossOrigin(origins = {
+    	    "http://localhost:8080",
+    	    "http://127.0.0.1:8080",
+    	    "http://192.168.1.92:8080",
+    	    "http://45.115.186.228:8080",
+    	    "http://localhost:3000"
+    	})
     @PostMapping("/users/{id}/change-password")
     public ResponseEntity<String> changePassword(@PathVariable Long id, @RequestBody Map<String, String> passwords) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
@@ -127,6 +155,13 @@ public class UserController {
         return ResponseEntity.ok("Password changed successfully");
     }
 
+    @CrossOrigin(origins = {
+    	    "http://localhost:8080",
+    	    "http://127.0.0.1:8080",
+    	    "http://192.168.1.92:8080",
+    	    "http://45.115.186.228:8080",
+    	    "http://localhost:3000"
+    	})
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {

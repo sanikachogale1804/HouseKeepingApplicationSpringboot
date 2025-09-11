@@ -10,7 +10,13 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import com.example.Demo.HouseKeppingApplication.Entity.FloorData;
 
 @RepositoryRestResource(path = "floorData")
-@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:8080" })
+@CrossOrigin(origins = {
+	    "http://localhost:8080",
+	    "http://127.0.0.1:8080",
+	    "http://192.168.1.92:8080",
+	    "http://45.115.186.228:8080",
+	    "http://localhost:3000"
+	})
 public interface floorDataRepository extends JpaRepository<FloorData, Long>{
 	
 	FloorData findTopByFloorNameAndSubFloorNameAndImageTypeOrderByIdDesc(
