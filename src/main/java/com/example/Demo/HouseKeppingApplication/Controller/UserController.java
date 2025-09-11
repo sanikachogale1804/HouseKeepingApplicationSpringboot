@@ -51,11 +51,23 @@ public class UserController {
             linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
     }
 
+    @CrossOrigin(origins = {
+    	    "http://localhost:8080",
+    	    "http://127.0.0.1:8080",
+    	    "http://192.168.1.92:8080",
+    	    "http://45.115.186.228:8080"
+    	})
     @PostMapping("/register")
     public User register(@RequestBody User user) {
         return service.register(user);
     }
 
+    @CrossOrigin(origins = {
+    	    "http://localhost:8080",
+    	    "http://127.0.0.1:8080",
+    	    "http://192.168.1.92:8080",
+    	    "http://45.115.186.228:8080"
+    	})
     @GetMapping("/login")
     public String login(@RequestParam String username, @RequestParam String userPassword) {
         User user = new User();

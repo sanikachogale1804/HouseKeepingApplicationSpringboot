@@ -1,5 +1,6 @@
 package com.example.Demo.HouseKeppingApplication.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import com.example.Demo.HouseKeppingApplication.Entity.FloorData;
 
 @RepositoryRestResource(path = "floorData")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:8080" })
 public interface floorDataRepository extends JpaRepository<FloorData, Long>{
 	
 	FloorData findTopByFloorNameAndSubFloorNameAndImageTypeOrderByIdDesc(
@@ -22,5 +23,4 @@ public interface floorDataRepository extends JpaRepository<FloorData, Long>{
 
 	List<FloorData> findByFloorNameAndSubFloorNameAndImageType(String floorName, String subFloorName, String imageType);
 
-	
 }

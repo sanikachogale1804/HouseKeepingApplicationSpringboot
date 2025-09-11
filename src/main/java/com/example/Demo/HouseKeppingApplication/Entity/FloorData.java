@@ -1,5 +1,7 @@
 package com.example.Demo.HouseKeppingApplication.Entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,4 +33,8 @@ public class FloorData {
 	 
 	 @Lob
 	 private String taskImage;
+	 
+//	 @Column(name = "upload_date")
+//	 private LocalDate uploadDate;
+
 }

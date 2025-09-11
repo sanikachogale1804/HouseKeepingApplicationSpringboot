@@ -2,6 +2,7 @@ package com.example.Demo.HouseKeppingApplication.Controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,23 +59,46 @@ public class TaskController {
 	    });
 	}
 
-	@CrossOrigin(origins = "http://localhost:3000")
+	 @CrossOrigin(origins = {
+	    	    "http://localhost:8080",
+	    	    "http://127.0.0.1:8080",
+	    	    "http://192.168.1.92:8080",
+	    	    "http://45.115.186.228:8080",
+	    	    "http://localhost:3000"
+	    	})
 	@GetMapping(value = "floorData/{floorDataId}/image")
 	public void serveTaskImage(@PathVariable Long floorDataId, HttpServletResponse response) throws IOException {
-	    floorDataRepository.findById(floorDataId).ifPresent(floorData -> {
-	        try (InputStream resource = fileService.getResource(imagePath, floorData.getTaskImage())) {
-	            response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+	    floorDataRepository.findById(floorDataId).ifPresentOrElse(floorData -> {
+	        String imageName = floorData.getTaskImage();
+	        if (imageName == null || imageName.isEmpty()) {
+	            response.setStatus(HttpStatus.NOT_FOUND.value());
+	            return;
+	        }
+	        try (InputStream resource = fileService.getResource(imagePath, imageName)) {
+	            String extension = imageName.substring(imageName.lastIndexOf(".") + 1).toLowerCase();
+	            if (extension.equals("png")) {
+	                response.setContentType(MediaType.IMAGE_PNG_VALUE);
+	            } else {
+	                response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+	            }
 	            StreamUtils.copy(resource, response.getOutputStream());
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 	        }
+	    }, () -> {
+	        response.setStatus(HttpStatus.NOT_FOUND.value());
 	    });
 	}
-	
 
 
-	@CrossOrigin(origins = "http://localhost:3000")
+	 @CrossOrigin(origins = {
+	    	    "http://localhost:8080",
+	    	    "http://127.0.0.1:8080",
+	    	    "http://192.168.1.92:8080",
+	    	    "http://45.115.186.228:8080",
+	    	    "http://localhost:3000"
+	    	})
 	@GetMapping("/floorData/images")
 	public ResponseEntity<List<FloorData>> getImagesBySubFloorName(
 	        @RequestParam(required = false) String floorName,
@@ -106,4 +130,6 @@ private void serveImage(HttpServletResponse response, String imageName) {
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
     }
 }
+
+
 }
