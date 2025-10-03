@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Demo.HouseKeppingApplication.Entity.FloorData;
+import com.example.Demo.HouseKeppingApplication.Entity.User;
 import com.example.Demo.HouseKeppingApplication.Repository.floorDataRepository;
+import com.example.Demo.HouseKeppingApplication.Repository.userRepository;
 import com.example.Demo.HouseKeppingApplication.Service.FileService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,9 +39,15 @@ public class TaskController {
 	@Autowired
 	private FileService fileService;
 	
+	@Autowired
+	private userRepository userRepo;
+
+	
+	
 	@PostMapping("floorData/{floorDataId}/image")
 	public ResponseEntity<String> uploadTaskImage(
 	        @RequestParam("taskImage") MultipartFile image,
+	        @RequestParam("uploadedById") Long uploadedById,   // ✅ uploader id frontend se lena
 	        @PathVariable Long floorDataId) throws IOException {
 
 	    return floorDataRepository.findById(floorDataId).map(floorData -> {
@@ -47,8 +55,14 @@ public class TaskController {
 	            String imageName = fileService.uploadFile(image, imagePath);
 	            System.out.println("✅ ImageName: " + imageName);
 
+	            // ✅ uploadedBy user fetch karo
+	            User uploader = userRepo.findById(uploadedById)
+	                    .orElseThrow(() -> new RuntimeException("User not found"));
+
 	            floorData.setTaskImage(imageName);
+	            floorData.setUploadedBy(uploader); // ✅ yahan set karo
 	            floorDataRepository.save(floorData);
+
 	            return new ResponseEntity<>("✅ Image uploaded successfully", HttpStatus.ACCEPTED);
 	        } catch (IOException e) {
 	            e.printStackTrace();
@@ -58,6 +72,7 @@ public class TaskController {
 	        return new ResponseEntity<>("❌ FloorData with ID " + floorDataId + " not found", HttpStatus.NOT_FOUND);
 	    });
 	}
+
 
 	 @CrossOrigin(origins = {
 	    	    "http://localhost:8080",
@@ -99,26 +114,29 @@ public class TaskController {
 	    	    "http://45.115.186.228:8080",
 	    	    "http://localhost:3000"
 	    	})
-	@GetMapping("/floorData/images")
-	public ResponseEntity<List<FloorData>> getImagesBySubFloorName(
-	        @RequestParam(required = false) String floorName,
-	        @RequestParam String subFloorName,
-	        @RequestParam(required = false) String imageType) {
+	 @GetMapping("/floorData/images")
+	 public ResponseEntity<List<FloorData>> getImages(
+	         @RequestParam(required = false) String floorName,
+	         @RequestParam(required = false) String subFloorName,
+	         @RequestParam(required = false) String imageType) {
 
-	    List<FloorData> results;
+	     List<FloorData> results;
 
-	    if (floorName != null && imageType != null) {
-	        results = floorDataRepository.findByFloorNameAndSubFloorNameAndImageType(floorName, subFloorName, imageType);
-	    } else if (floorName != null) {
-	        results = floorDataRepository.findByFloorNameAndSubFloorName(floorName, subFloorName);
-	    } else if (imageType != null) {
-	        results = floorDataRepository.findBySubFloorNameAndImageType(subFloorName, imageType);
-	    } else {
-	        results = floorDataRepository.findBySubFloorName(subFloorName);
-	    }
+	     if (floorName != null && subFloorName != null && imageType != null) {
+	         results = floorDataRepository.findByFloorNameAndSubFloorNameAndImageType(floorName, subFloorName, imageType);
+	     } else if (floorName != null && subFloorName != null) {
+	         results = floorDataRepository.findByFloorNameAndSubFloorName(floorName, subFloorName);
+	     } else if (subFloorName != null && imageType != null) {
+	         results = floorDataRepository.findBySubFloorNameAndImageType(subFloorName, imageType);
+	     } else if (subFloorName != null) {
+	         results = floorDataRepository.findBySubFloorName(subFloorName);
+	     } else {
+	         // 🔥 NEW: return all images if no filter is passed
+	         results = floorDataRepository.findAll();
+	     }
 
-	    return new ResponseEntity<>(results, HttpStatus.OK);
-	}
+	     return new ResponseEntity<>(results, HttpStatus.OK);
+	 }
 
 
 private void serveImage(HttpServletResponse response, String imageName) {
