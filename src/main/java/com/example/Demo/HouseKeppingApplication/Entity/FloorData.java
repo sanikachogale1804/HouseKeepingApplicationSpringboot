@@ -39,7 +39,7 @@ public class FloorData {
 	 @Lob
 	 private String taskImage;
 	 
-	 @Column(nullable = false)
+	
 	 private Boolean approved = false;
 	 
 //	 @Column(name = "upload_date")
@@ -47,7 +47,6 @@ public class FloorData {
 
 	 @ManyToOne(fetch = FetchType.EAGER)
 	 @JoinColumn(name = "uploaded_by_id")
-	 @JsonIgnoreProperties({"userPassword", "role"}) // password & role hide karne ke liye
 	 private User uploadedBy;
 
 }
