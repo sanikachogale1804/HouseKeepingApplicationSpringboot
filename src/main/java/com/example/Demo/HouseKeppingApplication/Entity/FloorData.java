@@ -38,7 +38,7 @@ public class FloorData {
 	 
 	 @Lob
 	 private String taskImage;
-	 
+	     
 	
 	 private Boolean approved = false;
 	 
